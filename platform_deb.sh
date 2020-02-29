@@ -1,7 +1,6 @@
 #!/bin/bash
 
 export resultFile=$1
-export hadPredecessor=false
 
 function printLn()
 {
@@ -28,7 +27,7 @@ function addSingle()
 function addSubdict()
 {
 	printLn "   \"$1\": {" $3
-	hadPredecessor=false
+	hadPredecessor=
 	for i in $2; do
 		subkey=$(echo $i | cut -f1 -d';')
 		subvalue=$(echo $i | cut -f2 -d';')
@@ -45,7 +44,8 @@ os=$(lsb_release -a 2>/dev/null |\
 
 echo -n "" > $resultFile
 printLn "{"
-addSingle "os" ""
+addSingle "type" "Linux"
+addSingle "os" "$os" true
 addSingle "kernel" "$(uname -r)" true
 addSingle "platform" "$(uname -i)" true
 addSingle "host" "$(hostname)" true
