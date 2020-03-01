@@ -1,4 +1,4 @@
-import json
+import xml.etree.ElementTree as ET
 from md import *
 
 def create_subpage( filename, dictionary ):
@@ -16,22 +16,21 @@ def create_subpage( filename, dictionary ):
     
 
 def main( filenames ):
-  data = [["os", "platform", "hostname", "# packages" ]]
-  result = h2( "Build Environments" )
+  data = [["type", "success", "failed", "skipped", "total" ]]
+  result = h2( "Test Results" )
 
   for f in filenames:
-    with open( f, "r" ) as jsonfile:
-      env = json.load( jsonfile )
-      subpage = "{} {} {} {}".format(
-        env["type"], env["platform"], env["os"], env["host"] 
-          )
-      create_subpage( subpage, env )
-      
-      data.append( [ 
-          slink( subpage ),
-          env["platform"], 
-          env["host"], 
-          len( env["packages"] )
-        ] )
+    testresult = ET.parse( f )
+    subpage = "testresult_{}".format(
+      env["type"], env["platform"], env["os"], env["host"] 
+        )
+    create_subpage( subpage, env )
+    
+    data.append( [ 
+        slink( subpage ),
+        env["platform"], 
+        env["host"], 
+        len( env["packages"] )
+      ] )
   result += table( data )
   return result
