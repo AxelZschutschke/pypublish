@@ -1,36 +1,44 @@
 import xml.etree.ElementTree as ET
 from md import *
+import plot
 
-def create_subpage( filename, dictionary ):
-  text  = h2( "Overview" )
-  data  = [ [ "Type", "Value" ] ]
-  data += [ [ x, dictionary[x] ] for x in dictionary if x != "packages" ]
-  text += table( data )
-
-  text += h2( "Installed Packages" )
-  data  = [ [ "Package", "Version" ] ]
-  data += [ [ x, dictionary["packages"][x] ] for x in dictionary["packages"] ]
-  text += table( data )
-
+def create_subpage( filename, dictionary, testdonut ):
+  text  = h2( "Tests" )
+  
+  text += "\n" + testdonut + "\n\n"
+  
+  data  = [ [ "status", "test", "time" ] ]
+  data += [ [ len(x), x.attrib["classname"], x.attrib["time"] ] for x in dictionary if "classname" in x.attrib ]
+  formatter = [ gr, nn, nn ]
+  text += table( data, formatter  )
   createPage( filename, filename, text )
     
 
-def main( filenames ):
-  data = [["type", "success", "failed", "skipped", "total" ]]
+def main( unit = [], integration = [], system = [] ):
+  data = [["test", "success", "failed", "skipped" ]]
   result = h2( "Test Results" )
 
-  for f in filenames:
+  overall_success = 0
+  overall_errors = 0
+  overall_skipped = 0
+  for f in unit:
     testresult = ET.parse( f )
-    subpage = "testresult_{}".format(
-      env["type"], env["platform"], env["os"], env["host"] 
-        )
-    create_subpage( subpage, env )
-    
-    data.append( [ 
-        slink( subpage ),
-        env["platform"], 
-        env["host"], 
-        len( env["packages"] )
-      ] )
-  result += table( data )
+    suites = testresult.getroot()
+
+    for testsuite in suites:
+      subpage = "Test Result - Unit Test - {}".format( testsuite.attrib["name"] ) 
+      errors = int( testsuite.attrib["errors"] ) + int( testsuite.attrib["failures"] )
+      skipped = int( testsuite.attrib["disabled"] ) if "disabled" in testsuite.attrib else 0
+      success = int( testsuite.attrib["tests"] ) - errors - skipped
+      testdonut = plot.donut( subpage, data[0][1:], [ success, errors, skipped ] )
+      testresult = create_subpage( subpage, testsuite, testdonut )
+      data.append( [ slink( subpage ), success, errors, skipped ])
+  
+      overall_success += success
+      overall_errors += errors
+      overall_skipped += skipped
+      
+  result += plot.donut( "Test Result - Unit Test", data[0][1:], [ overall_success, overall_errors, overall_skipped ] )
+  formatter = [ nn, ng, nr, ny ]
+  result += table( data, formatter )
   return result

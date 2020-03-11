@@ -1,30 +1,38 @@
 import json
+import re
 from md import *
 
-def parseErrors( filehandle, subpage ):
+def parseErrors( f, subpage ):
   text = ""
-  n_lines = 1
+  nlines = 1
   errors = []
-  for l in filehandle:
-    if "ERROR" in l:
-      errorName = subpage + "_" + str(n_lines)
+  for l in f:
+    upper = l.upper()
+    if "ERROR" in upper or "FAIL" in upper:
+      errorName = subpage + "_" + str(nlines)
+      text += "`````\n"
+      text += red()
       text += "\\anchor " + errorName + "\n"
+      text += "`````\n"
       errors.append( errorName )
-    text += "{:05}: {}\n".format( n_lines, l )
-  return text, errors
+    text += "{:05}: {}".format( nlines, re.sub(r"[`]+", "`", l ) )
+    #text += "{:05}: {}".format( nlines, l.replace( "`", "`" ))
+    nlines += 1
+  return text, nlines, errors
 
-def createSubpage( filename, dictionary ):
-  log, errors = parseErrors( filename )
+def createSubpage( f, subpage):
+  log, nlines, errors = parseErrors( f, subpage)
   text  = h2( "Errors" )
   for e in errors:
     text += "* \\ref " + e + "\n"
 
   text += h2( "Complete Log" )
-  text += "~~~~.txt"
-  text += 
-  text += "~~~~"
+  text += "`````\n"
+  text += log
+  text += "`````\n"
 
-  createPage( filename, filename, text )
+  createPage( subpage, subpage, text )
+  return nlines, len( errors )
     
 
 def main( filenames ):
@@ -33,16 +41,14 @@ def main( filenames ):
 
   for f in filenames:
     with open( f, "r" ) as logfile:
-      subpage = "{} {} {} {}".format(
-        env["type"], env["platform"], env["os"], env["host"] 
-          )
-      createSubpage( subpage, env )
+      f = f.replace( ".", "_" )
+      subpage = "logfile_{}_parsed".format( f )
+      nlines, nerrors = createSubpage( logfile, subpage )
       
       data.append( [ 
           slink( subpage ),
-          env["platform"], 
-          env["host"], 
-          len( env["packages"] )
+          nlines,
+          nerrors 
         ] )
-  result += table( data )
+  result += table( data, formatters=[nn,nn,nr] )
   return result
