@@ -57,3 +57,23 @@ data):
 	}
 	"platform": "x64"
 }
+
+### Preparing your project
+
+For best results, you only need to add the --out path to your Doxyfile/INPUT variable and
+to the Doxyfile/IMAGE_PATH. Markdown files and markdown support should be activated as
+well.
+
+~~~~~.txt
+...
+INPUT        += <PATH_TO_OUT_DIR>
+...
+IMAGE_PATH   += <PATH_TO_OUT_DIR>
+~~~~~
+
+Also, you should add two additional styles to your doxygen stylesheets. Doxygen recommends
+to use the HTML_EXTRA_STYLESHEET for that:
+
+~~~~~.txt
+HTML_EXTRA_STYLESHEET += <PATH_TO_OUT_DIR>/additional.css
+~~~~~

@@ -23,13 +23,10 @@ def slink( ref ):
   return "\subpage {}".format( formatFilename(ref))
 def img( filename, alt ):
   return "![{}]({})".format( str(alt), str(filename))
-def table( data, formatters = None ):
+def table( data ):
   seps = " | ".join( [ "---" for x in data[0] ] )
   data[0] = " | ".join( [ str(x) for x in data[0] ] )
-  if formatters and len( formatters ) == len( data[1] ):
-    data[1:] = [ " | ".join( [ f(x) + str(x) for f,x in zip( formatters, y ) ] ) for y in data[1:] ]
-  else:
-    data[1:] = [ " | ".join( [ str(x) for x in y ] ) for y in data[1:] ]
+  data[1:] = [ " | ".join( [ str(x) for x in y ] ) for y in data[1:] ]
   result  = "\n\n"
   result += data[0]
   result += "\n"
@@ -46,16 +43,10 @@ def createPage( title, ref, text ):
     f.write( text )
  
 def red():
-  return "![fail](red.png) "
-def nn( x ):
-  return ""
+  return "\image html red.png \"\" "
+def green():
+  return "\image html green.png \"\" "
 def rg( x ):
-  return red() if x == 0 else "![ok](green.png) "
+  return red() if x == 0 else green()
 def gr( x ):
-  return "![ok](green.png) " if x == 0 else "![fail](red.png) "
-def ng( x ):
-  return "" if x == 0 else "![ok](green.png) " 
-def nr( x ):
-  return "" if x == 0 else "![fail](red.png) " 
-def ny( x ):
-  return "" if x == 0 else "![warn](yellow.png) " 
+  return red() if x > 0 else green()

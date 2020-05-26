@@ -7,15 +7,14 @@ def create_subpage( filename, dictionary, testdonut ):
   
   text += "\n" + testdonut + "\n\n"
   
-  data  = [ [ "status", "test", "time" ] ]
-  data += [ [ len(x), x.attrib["classname"], x.attrib["time"] ] for x in dictionary if "classname" in x.attrib ]
-  formatter = [ gr, nn, nn ]
-  text += table( data, formatter  )
+  data  = [ [ "flag", "status", "test", "time" ] ]
+  data += [ [ gr(len(x)), len(x), x.attrib["classname"], x.attrib["time"] ] for x in dictionary if "classname" in x.attrib ]
+  text += table( data )
   createPage( filename, filename, text )
     
 
 def main( unit = [], integration = [], system = [] ):
-  data = [["test", "success", "failed", "skipped" ]]
+  data = [["flag", "test", "success", "failed", "skipped"  ]]
   result = h2( "Test Results" )
 
   overall_success = 0
@@ -30,15 +29,15 @@ def main( unit = [], integration = [], system = [] ):
       errors = int( testsuite.attrib["errors"] ) + int( testsuite.attrib["failures"] )
       skipped = int( testsuite.attrib["disabled"] ) if "disabled" in testsuite.attrib else 0
       success = int( testsuite.attrib["tests"] ) - errors - skipped
-      testdonut = plot.donut( subpage, data[0][1:], [ success, errors, skipped ] )
+      flag = gr( errors )
+      testdonut = plot.donut( subpage, data[0][1:-1], [ success, errors, skipped ] )
       testresult = create_subpage( subpage, testsuite, testdonut )
-      data.append( [ slink( subpage ), success, errors, skipped ])
+      data.append( [ flag, slink( subpage ), success, errors, skipped ])
   
       overall_success += success
       overall_errors += errors
       overall_skipped += skipped
       
   result += plot.donut( "Test Result - Unit Test", data[0][1:], [ overall_success, overall_errors, overall_skipped ] )
-  formatter = [ nn, ng, nr, ny ]
-  result += table( data, formatter )
+  result += table( data )
   return result
