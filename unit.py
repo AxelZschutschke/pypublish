@@ -2,42 +2,71 @@ import xml.etree.ElementTree as ET
 from md import *
 import plot
 
-def create_subpage( filename, dictionary, testdonut ):
-  text  = h2( "Tests" )
-  
-  text += "\n" + testdonut + "\n\n"
-  
-  data  = [ [ "flag", "status", "test", "time" ] ]
-  data += [ [ gr(len(x)), len(x), x.attrib["classname"], x.attrib["time"] ] for x in dictionary if "classname" in x.attrib ]
-  text += table( data )
-  createPage( filename, filename, text )
+##########################################################################################
+# XML file handling
+def getTestSuitesFromXML( filename ):
+  testresult = ET.parse( filename )
+  return testresult.getroot()
     
-
-def main( unit = [], integration = [], system = [] ):
-  data = [["flag", "test", "success", "failed", "skipped"  ]]
-  result = h2( "Test Results" )
-
-  overall_success = 0
-  overall_errors = 0
-  overall_skipped = 0
-  for f in unit:
-    testresult = ET.parse( f )
-    suites = testresult.getroot()
-
-    for testsuite in suites:
-      subpage = "Test Result - Unit Test - {}".format( testsuite.attrib["name"] ) 
-      errors = int( testsuite.attrib["errors"] ) + int( testsuite.attrib["failures"] )
-      skipped = int( testsuite.attrib["disabled"] ) if "disabled" in testsuite.attrib else 0
-      success = int( testsuite.attrib["tests"] ) - errors - skipped
-      flag = gr( errors )
-      testdonut = plot.donut( subpage, data[0][1:-1], [ success, errors, skipped ] )
-      testresult = create_subpage( subpage, testsuite, testdonut )
-      data.append( [ flag, slink( subpage ), success, errors, skipped ])
+def parseTestSuite( testsuite ):
+  subpage = "Test Result - Unit Test - {}".format( testsuite.attrib["name"] ) 
+  errors = int( testsuite.attrib["errors"] ) + int( testsuite.attrib["failures"] )
+  skipped = int( testsuite.attrib["disabled"] ) if "disabled" in testsuite.attrib else 0
+  success = int( testsuite.attrib["tests"] ) - errors - skipped
+  return subpage, errors, skipped, success
   
-      overall_success += success
-      overall_errors += errors
-      overall_skipped += skipped
+def createTestData( dictionary ):
+  data  = [ [ "flag", "status", "test", "time" ] ]
+  data += [ [ gr(len(x)), len(x), x.attrib["classname"], x.attrib["time"] ] \
+      for x in dictionary \
+      if "classname" in x.attrib ]
+  return data
+  
+##########################################################################################
+# plotting and creating texts
+def createTestDonut( title, errors, skipped, success ):
+  plotHeaders = [ "success", "failed", "skipped" ]
+  return plot.donut( title, plotHeaders, [ success, errors, skipped] )
+  
+def createTestText( title, plot, data ):
+  text  = h2( title )
+  text += "\n" 
+  text += plot 
+  text += "\n\n"
+  text += table( data )
+  return text
+
+##########################################################################################
+# handling subpages and creating main page
+def createTestSuiteSubpage( testsuite ):
+  subpageTitle, errors, skipped, success = parseTestSuite(testsuite)
+  subpageData = createTestData( testsuite )
+  subpageDonut = createTestDonut( subpageTitle, errors, skipped, success )
+  subpageText = createTestText( "Tests", subpageDonut, subpageData )
+  createPage( subpageTitle, subpageTitle, subpageText )
+  return success, errors, skipped, subpageTitle
+
+def main( unit = [] ):
+  title = "Test Results - Unit Test"
+  tableData = [[ "flag", "test", "success", "failed", "skipped"  ]]
+
+  overallSuccess = 0
+  overallErrors = 0
+  overallSkipped = 0
+
+  subpages = []
+
+  for f in unit:
+    for testsuite in getTestSuitesFromXML(f):
+      success, errors, skipped, subpage = createTestSuiteSubpage( testsuite )
+      tableData.append( [ gr(errors), ilink(subpage,subpage), success, errors, skipped ])
+  
+      overallSuccess += success
+      overallErrors += errors
+      overallSkipped += skipped
+
+      subpages += [ slink( subpage ) ]
       
-  result += plot.donut( "Test Result - Unit Test", data[0][1:], [ overall_success, overall_errors, overall_skipped ] )
-  result += table( data )
-  return result
+  overallDonut = createTestDonut( title, overallErrors, overallSkipped, overallSuccess )
+  overallText = createTestText( title, overallDonut, tableData )
+  return overallText, subpages

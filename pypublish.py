@@ -1,7 +1,7 @@
 import argparse
 import environment
 import unit
-import logs
+import logs 
 
 import md
 
@@ -23,11 +23,29 @@ args = parser.parse_args()
 md.output_path = args.out
 
 text  = ""
+subpages = []
+
 if args.env:
-  text += environment.main( args.env )
+  envtext, envsubpages = environment.main( args.env )
+  text += envtext
+  subpages += envsubpages
 if args.unit:
-  text += unit.main( args.unit )
+  unitText, unitSubpages = unit.main( args.unit )
+  text += unitText
+  subpages += unitSubpages
 if args.log:
-  text += logs.main( args.log )
+  logtext, logsubpages = logs.main( args.log )
+  text += logtext
+  subpages += logsubpages
+
+#### create subpages section (cleaning up TOC)
+text += "See also:\n\n"
+text += md.slink( "testreportsub" )
+subpagetext = ""
+for subpage in subpages:
+  subpagetext += " * {}\n".format( subpage )
+md.createPage( "Test Report - Subpages", "testreportsub", subpagetext )
 
 md.createPage( "Test Report", "testreport", text )
+
+

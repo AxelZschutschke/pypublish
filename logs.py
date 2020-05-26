@@ -20,27 +20,6 @@ from md import *
 #    nlines += 1
 #  return text, nlines, errors
 
-#def parseErrors( f, subpage ):
-#  text  = " fg | line | text \n"
-#  text += " ---- | ---- | ---- \n"
-#  nlines = 1
-#  errors = []
-#  for l in f:
-#    upper = l.upper()
-#    if "ERROR" in upper or "FAIL" in upper:
-#      errorName = subpage + "_" + str(nlines)
-#      #text += "v" * len(l)
-#      text += red()
-#      text += " \\anchor " + errorName 
-#      errors.append( errorName )
-#    else:
-#      text += green()
-#    text += " | {:05} | <pre class=\"pre_logs\">{}</pre>".format( nlines, re.sub(r"[`]+", "`", l ).replace(
-#    "\n", "" ))
-#    text += "\n"
-#    nlines += 1
-#  return text, nlines, errors
-
 def parseErrors( f, subpage ):
   text = ""
   nlines = 1
@@ -78,18 +57,20 @@ def createSubpage( f, subpage):
 def main( filenames ):
   data = [["flag", "log", "lines", "errors" ]]
   result = h2( "Log Files" )
+  subpages = []
 
   for f in filenames:
     with open( f, "r" ) as logfile:
       f = f.replace( ".", "_" )
-      subpage = "logfile_{}_parsed".format( f )
+      subpage = "Log File - {}".format( f )
       nlines, nerrors = createSubpage( logfile, subpage )
       
       data.append( [ 
           gr( nerrors ),
-          slink( subpage ),
+          ilink( subpage, subpage ),
           nlines,
           nerrors
         ] )
+      subpages.append( slink( subpage ))
   result += table( data )
-  return result
+  return result, subpages

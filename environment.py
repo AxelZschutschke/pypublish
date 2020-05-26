@@ -19,6 +19,8 @@ def main( filenames ):
   data = [["os", "platform", "hostname", "# packages" ]]
   result = h2( "Build Environments" )
 
+  subpages = []
+
   for f in filenames:
     with open( f, "r" ) as jsonfile:
       env = json.load( jsonfile )
@@ -28,10 +30,11 @@ def main( filenames ):
       create_subpage( subpage, env )
       
       data.append( [ 
-          slink( subpage ),
+          ilink( subpage, subpage ),
           env["platform"], 
           env["host"], 
           len( env["packages"] )
         ] )
+      subpages.append( slink( subpage ) )
   result += table( data )
-  return result
+  return result, subpages
