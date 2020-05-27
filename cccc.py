@@ -6,8 +6,8 @@ projectSummaryFeatures = [
   "lines_of_code",
   "lines_of_comment",
   "McCabes_cyclomatic_complexity",
-  "lines_of_code_per_lines_of_comment",
-  "McCabes_cyclomatic_complexity_per_lines_of_comment",
+  "lines_of_code_per_line_of_comment",
+  "McCabes_cyclomatic_complexity_per_line_of_comment",
   "rejected_lines_of_code"
   ]
 
@@ -16,8 +16,8 @@ proceduralFeatures = [
   "lines_of_code",
   "lines_of_comment",
   "McCabes_cyclomatic_complexity",
-  "lines_of_code_per_lines_of_comment",
-  "McCabes_cyclomatic_complexity_per_lines_of_comment"
+  "lines_of_code_per_line_of_comment",
+  "McCabes_cyclomatic_complexity_per_line_of_comment"
   ]
 
 ooFeatures = [
@@ -37,8 +37,8 @@ structuralFeatures = [
 ##########################################################################################
 # XML file handling
 def getRootFromXML( filename ):
-  testresult = ET.parse( filename )
-  return testresult.getroot()
+  cccc = ET.parse( filename )
+  return cccc.getroot()
     
 def getTimestamp( xmlRoot ):
   return xmlRoot.find( "timestamp" ).text
@@ -47,56 +47,56 @@ def extractFeaturesOfSection( section, features ):
   result = {}
   for feature in features:
     if feature == "name":
-      result[feature] = project_summary.find( feature ).text
+      result[feature] = section.find( feature ).text
     else:
-      result[feature] = projectSummary.find( feature ).get("value")
+      result[feature] = section.find( feature ).get("value")
   return result
 
 def parseProjectSummary( xmlRoot ):
   projectSummary = xmlRoot.find( "project_summary" )
-  return extractFeaturesOfSection( projectSummaryFeatures )
+  return extractFeaturesOfSection( projectSummary, projectSummaryFeatures )
 
 def parseProceduralSummary( xmlRoot ):
-  proceduralSummary = xmlRoot( "procedural_summary" )
+  proceduralSummary = xmlRoot.find( "procedural_summary" )
   result = []
   for module in proceduralSummary.findall( "module" ):
-    result.append( extractFeaturesOfSection( module ) )
+    result.append( extractFeaturesOfSection( module, proceduralFeatures ) )
   return result
 
 def parseOOSummary( xmlRoot ):
-  ooSummary = xmlRoot( "oo_design" )
+  ooSummary = xmlRoot.find( "oo_design" )
   result = []
   for module in ooSummary.findall( "module" ):
-    result.append( extractFeaturesOfSection( module ) )
+    result.append( extractFeaturesOfSection( module, ooFeatures ) )
   return result
 
 def parseStructuralSummary( xmlRoot ):
-  structuralSummary = xmlRoot( "structural_summary" )
+  structuralSummary = xmlRoot.find( "structural_summary" )
   result = []
   for module in structuralSummary.findall( "module" ):
-    result.append( extractFeaturesOfSection( module ) )
+    result.append( extractFeaturesOfSection( module, structuralFeatures ) )
   return result
 
 ##########################################################################################
 # plotting and creating texts
 def projectSummary( data, explanation=True ):
-  text = md.h2( "Project Summary" )
+  text = md.h2( "Code Metrics - CCCC - Project Summary" )
   text += "code counters / metrics calculated using CCCC\n"
   if explanation:
     text += "for explanations, please refer to the detailed report on the "
-    text += ilink( "CCCC report", "cccc_report" )
-    text += "subpage\n\n"
+    text += md.ilink( "CCCC report", "ccccreport" )
+    text += " subpage\n\n"
   tableData = [[ "metric", "value" ]]
   for feature in projectSummaryFeatures:
-    tableData += [ feature.replace( "_", " " ), data[feature] ]
+    tableData.append( [ feature.replace( "_", " " ), data[feature] ] )
   text += md.table( tableData )
   return text
 
-def structuralSummary( data ):
+def proceduralSummary( data ):
   text = md.h2( "Procedural Summary" )
-  tableData = [[ "module", "LOC", "COM", "MVG", "L_C", "M_C" ]]
+  tableData = [[ "module", "LOC", "COM", "MVG", "LC", "MC" ]]
   for module in data:
-    tableData += [ value for value in proceduralFeatures ]
+    tableData.append( [ module[value] for value in proceduralFeatures ] )
   text += md.table( tableData )
   return text
 
@@ -104,7 +104,7 @@ def ooSummary( data ):
   text = md.h2( "Object Oriented Design Summary" )
   tableData = [[ "module", "WMC", "DIT", "NOC", "CBD" ]]
   for module in data:
-    tableData += [ value for value in ooFeatures ]
+    tableData.append( [ module[value] for value in ooFeatures ] )
   text += md.table( tableData )
   return text
 
@@ -112,7 +112,7 @@ def structuralSummary( data ):
   text = md.h2( "Structural Summary" )
   tableData = [[ "module", "FI", "FO" ]]
   for module in data:
-    tableData += [ value for value in structuralFeatures ]
+    tableData.append( [ module[value] for value in structuralFeatures ] )
   text += md.table( tableData )
   return text
 
@@ -131,9 +131,9 @@ The following code metrics are reported:"
  * NOM **number of modules** - the number of non-trivial modules identified by the analyzer
  * LOC **lines of code** - the number of non-blank, non-comment lines of code
  * COM **lines of comments** - the number of lines of comment
- * MVG **McCabe's cyclomatic complexibility number [wikipedia](https://de.wikipedia.org/wiki/McCabe-Metrik)
- * L_C **lines of code per lines of comment**
- * M_C **McCabe's cyclomatic complexibility per lines of comment**
+ * MVG **McCabe's cyclomatic complexibility number** [wikipedia](https://de.wikipedia.org/wiki/McCabe-Metrik)
+ * LC **lines of code per lines of comment**
+ * MC **McCabe's cyclomatic complexibility per lines of comment**
  * REJ **rejected lines of code** which the analyzer refused to process
  * WMC **(weighted) methods per class** weight=1, represents the number of methods per class
  * DIT **depth of inheritance tree** length of longest path of inheritance ending in this module
@@ -150,12 +150,12 @@ For more details, please refer to the CCCC documentation (and output HTML files)
   text += ooSummary( ooSummaryData )
   text += structuralSummary( structuralSummaryData )
 
-  createPage( "Code Metrics", "cccc_report", text)
-  return proceduralSummaryData
+  md.createPage( "Code Metrics", "ccccreport", text)
+  return projectSummaryData
 
 def main( cccc = [] ):
   title = "Code Metrics - CCCC"
-  subpages = ["cccc_report"]
+  subpages = [md.slink( "ccccreport" )]
   ccccXml = getRootFromXML( cccc[0] )
   
   projectSummaryData = createCCCCSubpage( ccccXml )

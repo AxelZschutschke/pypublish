@@ -3,6 +3,9 @@ import environment
 import unit
 import logs 
 import cppcheck
+import security
+import cccc
+import valgrind
 
 import md
 
@@ -13,13 +16,17 @@ parser = argparse.ArgumentParser(
 parser.add_argument( "--out", type=str, nargs="?", default=".",
 	           help="output directory to export reports to" )
 parser.add_argument( "--env", type=str, nargs="+", default=[],
-	           help="environment report file[s]" )
+	           help="environment report file[s] (json)" )
 parser.add_argument( "--unit", type=str, nargs="+", default=[],
-		   help="junit xml report file[s]" )
+		   help="junit xml report file[s] (xml)" )
 parser.add_argument( "--log", type=str, nargs="+", default=[],
-		   help="log file[s]" )
+		   help="log file[s] (txt)" )
 parser.add_argument( "--cppcheck", type=str, nargs="+", default=[],
-		   help="cppcheck report file[s]" )
+		   help="cppcheck report file[s] (xml)" )
+parser.add_argument( "--cccc", type=str, nargs="+", default=[],
+		   help="cccc report file[s] (xml)" )
+parser.add_argument( "--valgrind", type=str, nargs="+", default=[],
+		   help="valgrind report file[s] (txt)" )
 
 args = parser.parse_args()
 
@@ -44,6 +51,14 @@ if args.cppcheck:
   cppchecktext, cppchecksubpages = cppcheck.main( args.cppcheck )
   text += cppchecktext
   subpages += cppchecksubpages
+if args.cccc:
+  cccctext, ccccsubpages = cccc.main( args.cccc )
+  text += cccctext
+  subpages += ccccsubpages
+if args.valgrind:
+  valgrindtext, valgrindsubpages = valgrind.main( args.valgrind )
+  text += valgrindtext
+  subpages += valgrindsubpages
 
 #### create subpages section (cleaning up TOC)
 text += "\n\n"

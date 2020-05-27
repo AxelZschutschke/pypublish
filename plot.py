@@ -39,6 +39,6 @@ def donut(
 
     text=str( sum( values ) )
     axs.annotate( text, xy=( -0.04 * len( text ), -0.05 ) )
-    axs.set_title( title )
+    #axs.set_title( title )
     plt.savefig( md.output_path + "/" + filename, dpi=80 )
     return "![{}]({})".format( title, filename )

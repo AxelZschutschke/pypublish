@@ -10,9 +10,9 @@ def parseResults( f ):
 
   for line in f:
     line = line.strip()
-    success += 1 if line.startswith( "[   OK   ]" )
-    error += 1 if line.startswith(   "[ FAILED ]" )
-    warning += 1 if line.startswith( "[  WARN  ]" )
+    success += 1 if line.startswith( "[   OK   ]" ) else 0
+    error += 1 if line.startswith(   "[ FAILED ]" ) else 0
+    warning += 1 if line.startswith( "[  WARN  ]" ) else 0
     text += line
 
   return text, error, warning, success
