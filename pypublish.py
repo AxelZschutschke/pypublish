@@ -2,6 +2,7 @@ import argparse
 import environment
 import unit
 import logs 
+import cppcheck
 
 import md
 
@@ -17,6 +18,8 @@ parser.add_argument( "--unit", type=str, nargs="+", default=[],
 		   help="junit xml report file[s]" )
 parser.add_argument( "--log", type=str, nargs="+", default=[],
 		   help="log file[s]" )
+parser.add_argument( "--cppcheck", type=str, nargs="+", default=[],
+		   help="cppcheck report file[s]" )
 
 args = parser.parse_args()
 
@@ -37,9 +40,14 @@ if args.log:
   logtext, logsubpages = logs.main( args.log )
   text += logtext
   subpages += logsubpages
+if args.cppcheck:
+  cppchecktext, cppchecksubpages = cppcheck.main( args.cppcheck )
+  text += cppchecktext
+  subpages += cppchecksubpages
 
 #### create subpages section (cleaning up TOC)
-text += "See also:\n\n"
+text += "\n\n"
+text += "**See also:**\n\n"
 text += md.slink( "testreportsub" )
 subpagetext = ""
 for subpage in subpages:

@@ -12,7 +12,8 @@ def donut(
   keys,
   values, 
   filename=None, 
-  colors = [ "limegreen", "tomato", "khaki", "steelblue", "silver" ] 
+  colors = [ "limegreen", "tomato", "khaki", "steelblue", "silver", "mediumpurple",
+  "peru", "pink" ] 
   ):
     """
     create an donut shape plot based on data and store to file
@@ -27,14 +28,14 @@ def donut(
     """
     if not filename:
       filename = md.formatFilename( title ) + ".png"
-    fig, axs = plt.subplots( figsize=(4,4), subplot_kw=dict(aspect="equal") )
+    fig, axs = plt.subplots( figsize=(6,4), subplot_kw=dict(aspect="equal") )
     wedges,texts = axs.pie( 
       values, 
       wedgeprops=dict(width=0.5), 
       startangle=90, 
       colors=colors[:len(values)] 
       )
-    axs.legend( wedges, keys, title=None, loc="lower right" )
+    axs.legend( wedges, keys, title=None, loc="upper right", bbox_to_anchor=(1.3,1) )
 
     text=str( sum( values ) )
     axs.annotate( text, xy=( -0.04 * len( text ), -0.05 ) )

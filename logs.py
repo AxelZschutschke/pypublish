@@ -38,6 +38,9 @@ def parseErrors( f, subpage ):
     nlines += 1
   return text, nlines, errors
 
+def createLogDonut( title, errors, success ):
+  plotHeaders = [ "success", "failed" ]
+  return plot.donut( title, plotHeaders, [ success, errors] )
 
 def createSubpage( f, subpage):
   log, nlines, errors = parseErrors( f, subpage)
@@ -57,12 +60,16 @@ def main( filenames ):
   data = [["flag", "log", "lines", "errors" ]]
   result = h2( "Log Files" )
   subpages = []
+  total = 0
+  errors = 0
 
   for f in filenames:
     with open( f, "r" ) as logfile:
       f = f.replace( ".", "_" )
       subpage = "Log File - {}".format( f )
       nlines, nerrors = createSubpage( logfile, subpage )
+      errors += min( nerrors, 1 )
+      total += 1
       
       data.append( [ 
           gr( nerrors ),
@@ -71,5 +78,6 @@ def main( filenames ):
           nerrors
         ] )
       subpages.append( slink( subpage ))
+  result += createLogDonut( "Log File Overview", errors, total-errors )
   result += table( data )
   return result, subpages
