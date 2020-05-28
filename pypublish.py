@@ -1,4 +1,8 @@
 import argparse
+
+import md
+import traceback
+
 import environment
 import unit
 import logs 
@@ -6,8 +10,8 @@ import cppcheck
 import security
 import cccc
 import valgrind
-
-import md
+import wizard
+import lcov
 
 parser = argparse.ArgumentParser( 
 	description="script for importing different test reports into doxygen" 
@@ -27,6 +31,13 @@ parser.add_argument( "--cccc", type=str, nargs="+", default=[],
 		   help="cccc report file[s] (xml)" )
 parser.add_argument( "--valgrind", type=str, nargs="+", default=[],
 		   help="valgrind report file[s] (txt)" )
+parser.add_argument( "--wizard", type=str, nargs="+", default=[],
+		   help="wizard report file[s] (txt)" )
+parser.add_argument( "--lcov", type=str, nargs="+", default=[],
+		   help="lcov report file[s] (txt)" )
+parser.add_argument( "--sec", type=str, nargs="+", default=[],
+		   help="security report file[s] (txt)" )
+
 
 args = parser.parse_args()
 
@@ -35,30 +46,27 @@ md.output_path = args.out
 text  = ""
 subpages = []
 
-if args.env:
-  envtext, envsubpages = environment.main( args.env )
-  text += envtext
-  subpages += envsubpages
-if args.unit:
-  unitText, unitSubpages = unit.main( args.unit )
-  text += unitText
-  subpages += unitSubpages
-if args.log:
-  logtext, logsubpages = logs.main( args.log )
-  text += logtext
-  subpages += logsubpages
-if args.cppcheck:
-  cppchecktext, cppchecksubpages = cppcheck.main( args.cppcheck )
-  text += cppchecktext
-  subpages += cppchecksubpages
-if args.cccc:
-  cccctext, ccccsubpages = cccc.main( args.cccc )
-  text += cccctext
-  subpages += ccccsubpages
-if args.valgrind:
-  valgrindtext, valgrindsubpages = valgrind.main( args.valgrind )
-  text += valgrindtext
-  subpages += valgrindsubpages
+def runModule( module, moduleArgs, text, subpages ):
+    if moduleArgs:
+        try:
+          moduleText, moduleSubPages = module.main( moduleArgs )
+          text += moduleText
+          subpages += moduleSubPages
+        except Exception as e:
+          text += md.h2( "{} - Exception Occoured".format( module.__name__ ))
+          text += traceback.format_exc()
+          traceback.print_exc()
+    return text, subpages
+      
+text, subpages = runModule( environment, args.env, text, subpages )
+text, subpages = runModule( unit, args.unit, text, subpages )
+text, subpages = runModule( logs, args.log, text, subpages )
+text, subpages = runModule( cppcheck, args.cppcheck, text, subpages )
+text, subpages = runModule( cccc, args.cccc, text, subpages )
+text, subpages = runModule( valgrind, args.valgrind, text, subpages )
+text, subpages = runModule( wizard, args.wizard, text, subpages )
+text, subpages = runModule( lcov, args.lcov, text, subpages )
+text, subpages = runModule( security, args.sec, text, subpages )
 
 #### create subpages section (cleaning up TOC)
 text += "\n\n"

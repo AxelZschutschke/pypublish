@@ -74,7 +74,7 @@ def red():
   """
   place the image of a green flag
   """
-  return "\image html red.png \"\" "
+  return "!(red.png) "
 def green():
   """
   place the image of a green flag

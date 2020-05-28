@@ -69,7 +69,7 @@ def createCppCheckSubpage( title, subpage, plot, data ):
         text += "**location of finding:**\n"
         text += "  {}:{}\n\n".format( location["file"], location["line"] )
         text += "**surrounding code:**\n"
-        text += "~~~~~.cpp\n"
+        text += "~~~~~{.cpp}\n"
         text += createFileExcerpt( location )
         text += "~~~~~\n\n"
 

@@ -19,6 +19,24 @@ from md import *
 #    nlines += 1
 #  return text, nlines, errors
 
+def parseErrors_pureMD( f, subpage ):
+  text = "\n\n~~~~~\n"
+  nlines = 1
+  errors = []
+  for l in f:
+    upper = l.upper()
+    if "ERROR" in upper or "FAIL" in upper:
+      errors.append( nlines )
+      text += "[FAIL] "
+    else:
+      text += "[    ] "
+    text += "{:05}: ".format( nlines )
+    text += "{}".format( re.sub(r"~~[~]+", "~...~", l ).replace( "\n", "" ))
+    text += "\n"
+    nlines += 1
+  text += "~~~~~\n\n"
+  return text, nlines, errors
+
 def parseErrors( f, subpage ):
   text = ""
   nlines = 1
@@ -41,6 +59,18 @@ def parseErrors( f, subpage ):
 def createLogDonut( title, errors, success ):
   plotHeaders = [ "success", "failed" ]
   return plot.donut( title, plotHeaders, [ success, errors] )
+
+def createSubpage_pureMD( f, subpage):
+  log, nlines, errors = parseErrors_pureMD( f, subpage)
+  #text  = h2( "Errors" )
+  #for e in errors:
+  #  text += "* line " + str(e) + "\n"
+
+  text = h2( "Complete Log" )
+  text += log
+
+  createPage( subpage, subpage, text )
+  return nlines, len( errors )
 
 def createSubpage( f, subpage):
   log, nlines, errors = parseErrors( f, subpage)
@@ -67,7 +97,7 @@ def main( filenames ):
     with open( f, "r" ) as logfile:
       f = f.replace( ".", "_" )
       subpage = "Log File - {}".format( f )
-      nlines, nerrors = createSubpage( logfile, subpage )
+      nlines, nerrors = createSubpage_pureMD( logfile, subpage )
       errors += min( nerrors, 1 )
       total += 1
       

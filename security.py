@@ -27,18 +27,18 @@ def createOverviewDonut( title, errors, total ):
 
 def createSubpage( f, subpage):
   log, error, warning, success= parseResults( f )
-  text  = h2( subpage )
+  text  = md.h2( subpage )
   
   text += createDetailDonut( subpage, error, warning, success )
 
-  text += h2( "Complete Log" )
+  text += md.h2( "Complete Log" )
   text += "\n"
-  text += "~~~~~.txt"
+  text += "~~~~~{.txt}"
   text += log
   text += "~~~~~"
 
-  createPage( subpage, subpage, text )
-  return errors, warning, success    
+  md.createPage( subpage, subpage, text )
+  return error, warning, success    
 
 def main( filenames ):
   data = [["flag", "component", "success", "warning", "errors" ]]
@@ -55,15 +55,15 @@ def main( filenames ):
       total += 1
       
       data.append( [ 
-          gr( error ),
-          ilink( subpage, subpage ),
+          md.gr( error ),
+          md.ilink( subpage, subpage ),
           success,
           warning,
           error
         ] )
       subpages.append( slink( subpage ))
 
-  result = h2( "Security Checks" )
+  result = md.h2( "Security Checks" )
   result += createOverviewDonut( "Modules", errors, total )
-  result += table( data )
+  result += md.table( data )
   return result, subpages

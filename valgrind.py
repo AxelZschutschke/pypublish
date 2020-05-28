@@ -44,7 +44,7 @@ def createSubpage( f, subpage):
 
   text += h2( "Complete Log" )
   text += "\n"
-  text += "~~~~~.txt\n"
+  text += "~~~~~{.txt}\n"
   text += log
   text += "\n~~~~~\n"
 
@@ -54,7 +54,7 @@ def createSubpage( f, subpage):
 
 def main( filenames ):
   data = [["flag", "valgrind report", "errors", "leaks" ]]
-  result = h2( "Test Report - Memcheck" )
+  title = "Test Report - Memcheck"
   subpages = []
   success = 0
   errors = 0
@@ -62,7 +62,7 @@ def main( filenames ):
 
   for filename in filenames:
     with open( filename, "r" ) as f:
-      subpage = "Memcheck - {}".format( filename )
+      subpage = "{} - {}".format( title, filename )
       nerrors, nleaks = createSubpage( f, subpage )
       errors += min( nerrors, 1 )
       leaks += min(nleaks, 1 )
@@ -75,6 +75,7 @@ def main( filenames ):
           nleaks
         ] )
       subpages.append( slink( subpage ))
-  result += createLogDonut( "Memcheck Overview", success, errors, leaks )
-  result += table( data )
-  return result, subpages
+  text = h2( title )
+  text += createLogDonut( title + " - Overview", success, errors, leaks )
+  text += table( data )
+  return text, subpages

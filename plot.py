@@ -2,6 +2,8 @@
 simple wrapper around matplotlib for test result visualization
 """
 
+import matplotlib as mpl
+mpl.use( "Agg" )
 import matplotlib.pyplot as plt
 import md
 
@@ -41,4 +43,5 @@ def donut(
     axs.annotate( text, xy=( -0.04 * len( text ), -0.05 ) )
     #axs.set_title( title )
     plt.savefig( md.output_path + "/" + filename, dpi=80 )
-    return "![{}]({})".format( title, filename )
+    plt.close()
+    return "![{}]({})".format( title, filename ) + "\n\n"
