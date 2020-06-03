@@ -12,6 +12,8 @@ def formatFilename( name ):
           replace( ".", "_" ).\
           replace( "-", "_" ).\
           replace( "/", "_" ).\
+          replace( "(", "_" ).\
+          replace( ")", "_" ).\
           lower()
 
 def h1( title, link ):
@@ -23,7 +25,7 @@ def h2( title ):
   """
   begin subsection
   """
-  return "# {}\n\n".format( str( title ) )
+  return "\n\n------------------\n\n# {}\n\n".format( str( title ) )
 def link( text, ref ):
   """
   create internal link to an given site
@@ -67,14 +69,17 @@ def createPage( title, ref, text ):
   ref = formatFilename( ref )
   with open( output_path + "/" + ref + ".md", "w" ) as f:
     f.write( h1( title, ref ) )
-    f.write( "[TOC]\n\n" )
+    #f.write( "[TOC]\n\n" )
     f.write( text )
  
+def removeSpecial( line ):
+    return line.replace( "\\", "\\\\" ).replace( "~\n", "'~' \n" ).replace("\n","")
+
 def red():
   """
   place the image of a green flag
   """
-  return "!(red.png) "
+  return "\image html red.png \"\" "
 def green():
   """
   place the image of a green flag

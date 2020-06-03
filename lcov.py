@@ -68,45 +68,14 @@ import md
 ###      end_of_record
 ###
 
-def formatLine( line, branch, hits, code ):
-    text = ""
-    if hits == "0":
-        text += " \noop <pre class=\"pre_fail\">"
-    else:
-        text += " \noop <pre class=\"pre_ok\">"
-    text += "{:4} : {:6} : {:4} : {}</pre>\n".format( line, branch, hits, code.replace("\n", "") )
-    return text
-
 def formatLine_pureMD( line, branch, hits, code ):
     text = ""
     if hits == "0":
         text += "!! "
     else:
         text += "   "
-    text += "{:4} : {:6} : {:4} : {}\n".format( line, branch, hits, code.replace("\n", "") )
+    text += "{:4} : {:6} : {:4} : {}\n".format( line, branch, hits, md.removeSpecial( code ) )
     return text
-
-def createCoverageSourceFile( title, sub):
-    text = ""
-    text += "***full path:*** " + sub["fullpath"]
-    text += "\n\n"
-    text += "***source code:*** " 
-    text += "\n\n"
-    try:
-        with open( sub["fullpath"], "r" ) as f:
-            lines = f.readlines()
-            text += formatLine( "line",  "branch", "hits", "code" )
-            for idx, line in enumerate( lines ):
-                counter = sub["DA"][idx+1] if "DA" in sub and idx + 1 in sub["DA"] else " "
-                branchData = sub["BRDA"][idx+1] if "BRDA" in sub and idx + 1 in sub["BRDA"] else ""
-                while len( branchData ) > 6:
-                    text += formatLine( idx + 1, branchData[:6], "", "" )
-                    branchData = branchData[6:]
-                text += formatLine( idx+1, branchData, counter, line )
-    except Exception as e:
-        text = "exception occoured creating page:"
-        text += str(e)
-    md.createPage( title, title, text)
 
 def createCoverageSourceFile_pureMD( title, sub):
     text = ""
@@ -280,6 +249,7 @@ def main( coverage ):
         subpages += [ md.slink( title ) ]
         subpages += subsubpages
 
+    text += md.h2( "Test Report - Coverage Analysis" )
     text += createCoverageDonut( project + " - lines", lhit_global, ltot_global )
     text += md.table( overallData )
     return text, subpages

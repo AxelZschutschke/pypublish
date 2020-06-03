@@ -81,9 +81,9 @@ def parseStructuralSummary( xmlRoot ):
 # plotting and creating texts
 def projectSummary( data, explanation=True ):
   text = md.h2( "Code Metrics - CCCC - Project Summary" )
-  text += "code counters / metrics calculated using CCCC\n"
+  text += "> code counters / metrics calculated using CCCC\n"
   if explanation:
-    text += "for explanations, please refer to the detailed report on the "
+    text += "> for explanations, please refer to the detailed report on the "
     text += md.ilink( "CCCC report", "ccccreport" )
     text += " subpage\n\n"
   tableData = [[ "metric", "value" ]]
@@ -126,23 +126,23 @@ def createCCCCSubpage( xml ):
 
   text = md.h2( "Explanations" )
   text += """
-The following code metrics are reported:"
-
- * NOM **number of modules** - the number of non-trivial modules identified by the analyzer
- * LOC **lines of code** - the number of non-blank, non-comment lines of code
- * COM **lines of comments** - the number of lines of comment
- * MVG **McCabe's cyclomatic complexibility number** [wikipedia](https://de.wikipedia.org/wiki/McCabe-Metrik)
- * LC **lines of code per lines of comment**
- * MC **McCabe's cyclomatic complexibility per lines of comment**
- * REJ **rejected lines of code** which the analyzer refused to process
- * WMC **(weighted) methods per class** weight=1, represents the number of methods per class
- * DIT **depth of inheritance tree** length of longest path of inheritance ending in this module
- * NOC **number of children** number of children which inherit directly from this module
- * CBD **coupling between objects** number of modules which are coupled directly to this module (either client or supplier)
- * FI **fan-in** number of modules passing information into this module
- * FO **fan-out** number of modules into which this module passes information
-
-For more details, please refer to the CCCC documentation (and output HTML files)
+> The following code metrics are reported:
+>
+> * NOM **number of modules** - the number of non-trivial modules identified by the analyzer
+> * LOC **lines of code** - the number of non-blank, non-comment lines of code
+> * COM **lines of comments** - the number of lines of comment
+> * MVG **McCabe's cyclomatic complexibility number** [wikipedia](https://de.wikipedia.org/wiki/McCabe-Metrik)
+> * LC **lines of code per lines of comment**
+> * MC **McCabe's cyclomatic complexibility per lines of comment**
+> * REJ **rejected lines of code** which the analyzer refused to process
+> * WMC **weighted methods per class** weight=1, represents the number of methods per class
+> * DIT **depth of inheritance tree** length of longest path of inheritance ending in this module
+> * NOC **number of children** number of children which inherit directly from this module
+> * CBD **coupling between objects** number of modules which are coupled directly to this module (either client or supplier)
+> * FI **fan-in** number of modules passing information into this module
+> * FO **fan-out** number of modules into which this module passes information
+>
+> For more details, please refer to the CCCC documentation (and output HTML files)
 """
   text += projectSummary( projectSummaryData, False )
 

@@ -1,28 +1,11 @@
 import re
 from md import *
 
-#def parseErrors( f, subpage ):
-#  text = ""
-#  nlines = 1
-#  errors = []
-#  for l in f:
-#    upper = l.upper()
-#    if "ERROR" in upper or "FAIL" in upper:
-#      errorName = subpage + "_" + str(nlines)
-#      text += "`````\n"
-#      text += red()
-#      text += "\\anchor " + errorName + "\n"
-#      text += "`````\n"
-#      errors.append( errorName )
-#    text += "{:05}: {}".format( nlines, re.sub(r"[`]+", "`", l ) )
-#    #text += "{:05}: {}".format( nlines, l.replace( "`", "`" ))
-#    nlines += 1
-#  return text, nlines, errors
-
 def parseErrors_pureMD( f, subpage ):
   text = "\n\n~~~~~\n"
   nlines = 1
   errors = []
+  counter = 0
   for l in f:
     upper = l.upper()
     if "ERROR" in upper or "FAIL" in upper:
@@ -31,31 +14,15 @@ def parseErrors_pureMD( f, subpage ):
     else:
       text += "[    ] "
     text += "{:05}: ".format( nlines )
-    text += "{}".format( re.sub(r"~~[~]+", "~...~", l ).replace( "\n", "" ))
+    text += "{}".format( l.replace( "~", "&tilde;" ).replace( "\n", "" ))
     text += "\n"
     nlines += 1
+    if nlines % 10 == 0:
+      # too long texts are not formatted as pre-formatted text
+      text += "~~~~~\n\n\n~~~~~\n"
   text += "~~~~~\n\n"
   return text, nlines, errors
-
-def parseErrors( f, subpage ):
-  text = ""
-  nlines = 1
-  errors = []
-  for l in f:
-    upper = l.upper()
-    if "ERROR" in upper or "FAIL" in upper:
-      text += " <pre class=\"pre_fail\">"
-      errorName = subpage + "_" + str(nlines)
-      errors.append( errorName )
-      text += " \\anchor " + errorName + " "
-    else:
-      text += " <pre class=\"pre_ok\">"
-    text += "{:05}: ".format( nlines )
-    text += "{}".format( re.sub(r"[`]+", "`", l ).replace( "\n", "" ))
-    text += "</pre>\n"
-    nlines += 1
-  return text, nlines, errors
-
+    
 def createLogDonut( title, errors, success ):
   plotHeaders = [ "success", "failed" ]
   return plot.donut( title, plotHeaders, [ success, errors] )
@@ -72,19 +39,6 @@ def createSubpage_pureMD( f, subpage):
   createPage( subpage, subpage, text )
   return nlines, len( errors )
 
-def createSubpage( f, subpage):
-  log, nlines, errors = parseErrors( f, subpage)
-  text  = h2( "Errors" )
-  for e in errors:
-    text += "* \\ref " + e + "\n"
-
-  text += h2( "Complete Log" )
-  text += "\n"
-  text += log
-
-  createPage( subpage, subpage, text )
-  return nlines, len( errors )
-    
 
 def main( filenames ):
   data = [["flag", "log", "lines", "errors" ]]
@@ -95,7 +49,7 @@ def main( filenames ):
 
   for f in filenames:
     with open( f, "r" ) as logfile:
-      f = f.replace( ".", "_" )
+      f = f.replace( ".", "_" ).split( "/" )[-1]
       subpage = "Log File - {}".format( f )
       nlines, nerrors = createSubpage_pureMD( logfile, subpage )
       errors += min( nerrors, 1 )

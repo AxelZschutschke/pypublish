@@ -4,8 +4,14 @@ from md import *
 def create_subpage( filename, dictionary ):
   text  = h2( "Overview" )
   data  = [ [ "Type", "Value" ] ]
-  data += [ [ x, dictionary[x] ] for x in dictionary if x != "packages" ]
+  data += [ [ x, dictionary[x] ] for x in dictionary if not x in [ "packages", "custom" ] and dictionary[x] ]
   text += table( data )
+
+  if "custom" in dictionary:
+      text += h2( "Custom Installations" )
+      data  = [ [ "Package", "Version" ] ]
+      data += [ [ x, dictionary["custom"][x] ] for x in dictionary["custom"] ]
+      text += table( data )
 
   text += h2( "Installed Packages" )
   data  = [ [ "Package", "Version" ] ]
@@ -30,7 +36,7 @@ def main( filenames ):
       create_subpage( subpage, env )
       
       data.append( [ 
-          ilink( subpage, subpage ),
+          ilink( env["os"], subpage ),
           env["platform"], 
           env["host"], 
           len( env["packages"] )
